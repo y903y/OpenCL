@@ -41,19 +41,18 @@ int main(){
 
 
   /*context作成*/
-  cl_context_properties properties[] = {CL_CONTEXT_PLATFORM, (cl_context_properties)id[0],CL_CONTEXT_PLATFORM,(cl_context_properties)id[1], 0}; 
-  cl_device_id device1,device2;
-  cl_uint num_devices1, num_devices2;
-  clGetDeviceIDs(id[0], CL_DEVICE_TYPE_ALL, 4, &device1, &num_devices1);
-  clGetDeviceIDs(id[1], CL_DEVICE_TYPE_ALL, 4, &device2, &num_devices2);
-  cl_device_id devices[] = {device1, device2};
+  cl_context_properties properties[] = {CL_CONTEXT_PLATFORM, (cl_context_properties)id[0], 0}; 
+  cl_device_id device;
+  cl_uint num_devices;
+  clGetDeviceIDs(id[0], CL_DEVICE_TYPE_ALL, 4, &device, &num_devices);
+  cl_device_id devices[] = {device};
 
-  cout << CL_CONTEXT_PLATFORM<<" "<<id[0] << " " << id[1] << " " << device1 << " " << device2 << " " << num_devices1<<" "<<num_devices2 <<endl;
+  cout << CL_CONTEXT_PLATFORM<<" "<<id[0] << " " << id[1] << " " << device<<" "<<num_devices <<endl;
 
   cl_int status;
   cl_context context;
   //context = clCreateContextFromType(NULL, CL_DEVICE_TYPE_CPU, NULL, NULL, &status);
-  context = clCreateContext(properties,10, devices, NULL, NULL, &status);
+  context = clCreateContext(properties,num_devices, devices, NULL, NULL, &status);
   cout << "Context : " << status << endl;
 
 }
