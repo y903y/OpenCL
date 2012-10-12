@@ -1,0 +1,59 @@
+#include <CL/cl.h>
+#include <iostream>
+
+using namespace std;
+
+int main(){
+
+  /*--Platform取得--*/
+  cl_platform_id id[3];//プラットホームID
+
+  cl_int num = 3;//プラットホームを３つまで見つける
+  cl_uint Rnum;//実際に取得したプラットホーム数
+  cl_char name[1024];//プラットホーム名
+
+  clGetPlatformIDs(num,id,&Rnum);
+  cout<<"Platform Max Number = "<<Rnum<<endl<<endl;
+
+  for(int i = 0;i < Rnum;i++)//プラットホームを探し、すべてのプラットホームを表示
+  {
+
+    clGetPlatformInfo(id[i],CL_PLATFORM_NAME,sizeof(name),name,NULL);
+    cout<<"Platform Name{"<< id[i] <<"} = "<<name<<endl;
+
+    /*--デバイス取得--*/
+    cl_device_id dev[10];//デバイスID(構造体のアドレスが格納される)
+
+    cl_uint DC;//実際に取得したデバイス数
+    cl_char buff[1024];//デバイス名
+    cl_int num1 = 10;
+    clGetDeviceIDs(id[i],CL_DEVICE_TYPE_ALL,num1,dev,&DC);//プラットホームID,デバイスタイプ,
+    cout<<"Device Max Number = "<<DC<<endl;
+
+    for(int j= 0;j < DC;j++)
+    {
+
+      clGetDeviceInfo(dev[j],CL_DEVICE_NAME,sizeof(buff),buff,NULL);
+      cout<<" Device Name = "<<buff<<endl;
+    }
+    cout << endl;
+  }
+
+
+  /*context作成*/
+  cl_context_properties properties[] = {CL_CONTEXT_PLATFORM, (cl_context_properties)id[0],CL_CONTEXT_PLATFORM,(cl_context_properties)id[1], 0}; 
+  cl_device_id device1,device2;
+  cl_uint num_devices1, num_devices2;
+  clGetDeviceIDs(id[0], CL_DEVICE_TYPE_ALL, 4, &device1, &num_devices1);
+  clGetDeviceIDs(id[1], CL_DEVICE_TYPE_ALL, 4, &device2, &num_devices2);
+  cl_device_id devices[] = {device1, device2};
+
+  cout << CL_CONTEXT_PLATFORM<<" "<<id[0] << " " << id[1] << " " << device1 << " " << device2 << " " << num_devices1<<" "<<num_devices2 <<endl;
+
+  cl_int status;
+  cl_context context;
+  //context = clCreateContextFromType(NULL, CL_DEVICE_TYPE_CPU, NULL, NULL, &status);
+  context = clCreateContext(properties,10, devices, NULL, NULL, &status);
+  cout << "Context : " << status << endl;
+
+}
