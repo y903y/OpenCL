@@ -41,24 +41,26 @@ int main(){
 
 
   /*context作成*/
-  cl_context_properties properties_cpu[] = {CL_CONTEXT_PLATFORM, (cl_context_properties)id[0], 0}; 
+  //cl_context_properties properties_cpugpu[] = {CL_CONTEXT_PLATFORM, (cl_context_properties)id[0],(cl_context_properties)id[1], 0}; 
   cl_context_properties properties_gpu[] = {CL_CONTEXT_PLATFORM, (cl_context_properties)id[1], 0};    
-  cl_device_id device[4];
+  cl_device_id device_list_cpu, device_list_gpu;
   cl_uint num_devices_cpu, num_devices_gpu;
   cl_int getdevice;
-  getdevice = clGetDeviceIDs(id[0], CL_DEVICE_TYPE_ALL, 4, &device[0], &num_devices_cpu);
+  getdevice = clGetDeviceIDs(id[0], CL_DEVICE_TYPE_ALL, 4, &device_list_cpu, &num_devices_cpu);
   cout << getdevice << endl;
-  getdevice = clGetDeviceIDs(id[1], CL_DEVICE_TYPE_ALL, 4, &device[1], &num_devices_gpu);
+  getdevice = clGetDeviceIDs(id[1], CL_DEVICE_TYPE_ALL, 4, &device_list_gpu, &num_devices_gpu);
   cout << getdevice << endl;
   // cl_device_id devices[] = {device};
 
-  cout << CL_CONTEXT_PLATFORM<<" "<<id[0] << " " << id[1] << " " << device<<" "<< num_devices_cpu<<" "<<num_devices_gpu <<endl;
+  cout << CL_CONTEXT_PLATFORM <<" "<< id[0] << " " << id[1] <<" "<< num_devices_cpu <<" "<< num_devices_gpu <<endl;
 
   cl_int status_cpu, status_gpu;
-  cl_context context_cpu, context_gpu;
+  cl_context context_cpu; 
+  cl_context context_gpu;
+  cl_device_id devicecpugpu[] = {device_list_cpu, device_list_gpu};
   //context = clCreateContextFromType(NULL, CL_DEVICE_TYPE_CPU, NULL, NULL, &status);
-  context_cpu = clCreateContext(properties_cpu,num_devices_cpu, &device[0], NULL, NULL, &status_cpu);
-  context_gpu = clCreateContext(properties_gpu,num_devices_gpu, &device[1], NULL, NULL, &status_gpu);
+  cout <<"make context "<<devicecpugpu<<endl;
+  //context_cpu = clCreateContext(properties_cpugpu, num_devices_cpu + num_devices_gpu, devicecpugpu, NULL, NULL, &status_cpu);
+  context_gpu = clCreateContext(properties_gpu,num_devices_gpu, &device_list_gpu, NULL, NULL, &status_gpu);
   cout << "Context_cpu : " << status_cpu <<"  Context_gpu : "<< status_gpu << endl;
-
 }

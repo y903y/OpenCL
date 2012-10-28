@@ -77,12 +77,13 @@ int main()
   cl_context_properties properties_gpu[] = {CL_CONTEXT_PLATFORM, (cl_context_properties)platforms[1], 0};
 
   //1.デバイスの取得
-  cl_device_id device_list[4];
+  cl_device_id device_list_cpu, device_list_gpu, device_list[2];
   cl_uint num_device_cpu, num_device_gpu;
-  status_cpu = clGetDeviceIDs(platforms[0], CL_DEVICE_TYPE_CPU, 4, &device_list[0], &num_device_cpu);
-  status_gpu = clGetDeviceIDs(platforms[1], CL_DEVICE_TYPE_GPU, 4, &device_list[1], &num_device_gpu);
+  status_cpu = clGetDeviceIDs(platforms[0], CL_DEVICE_TYPE_CPU, 4, device_list[0], &num_device_cpu);
+  status_gpu = clGetDeviceIDs(platforms[1], CL_DEVICE_TYPE_GPU, 4, device_list[1], &num_device_gpu);
 
   //2.コンテキスト作成
+  cl_device_id devices[] = {device_list_cpu, device_list_gpu}
   cl_context context_cpu, context_gpu;
   context_cpu = clCreateContext(properties_cpu, num_device_cpu, &device_list[0], NULL, NULL, &status_cpu);
   context_gpu = clCreateContext(properties_gpu, num_device_gpu, &device_list[1], NULL, NULL, &status_gpu);
