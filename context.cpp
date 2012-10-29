@@ -58,7 +58,7 @@ int main(){
   cl_context context_cpu; 
   cl_context context_gpu;
   cl_device_id devicecpugpu[] = {device_list_cpu, device_list_gpu};
-  //context = clCreateContextFromType(NULL, CL_DEVICE_TYPE_CPU, NULL, NULL, &status);
+  //context = clCreateContextFromType(NULL, CL_DEVICE_TYPE_GPU, NULL, NULL, &status);
   cout <<"make context "<<devicecpugpu<<endl;
   //context_cpu = clCreateContext(properties_cpugpu, num_devices_cpu + num_devices_gpu, devicecpugpu, NULL, NULL, &status_cpu);
   context_gpu = clCreateContext(properties_gpu,num_devices_gpu, &device_list_gpu, NULL, NULL, &status_gpu);

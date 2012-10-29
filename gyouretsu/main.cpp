@@ -62,7 +62,7 @@ int main()
 
   // プラットフォームIDを取得する
   cl_int status, status_cpu, status_gpu;
-  cl_platform_id platforms[10];
+  cl_platform_id platforms[2];
   cl_uint num_platforms;
   status = clGetPlatformIDs(2, platforms, &num_platforms);
   if (status != CL_SUCCESS || num_platforms <= 0) 
@@ -71,34 +71,35 @@ int main()
     printf("%d\n",status);
     return 1;
   }
-
   // 最初の要素として返されたプラットフォームIDを、プロパティにセットする
   cl_context_properties properties_cpu[] = {CL_CONTEXT_PLATFORM, (cl_context_properties)platforms[0], 0};
   cl_context_properties properties_gpu[] = {CL_CONTEXT_PLATFORM, (cl_context_properties)platforms[1], 0};
 
   //1.デバイスの取得
-  cl_device_id device_list_cpu, device_list_gpu, device_list[2];
+  cl_device_id device_list[4];//なぜか2じゃできない
   cl_uint num_device_cpu, num_device_gpu;
-  status_cpu = clGetDeviceIDs(platforms[0], CL_DEVICE_TYPE_CPU, 4, device_list[0], &num_device_cpu);
-  status_gpu = clGetDeviceIDs(platforms[1], CL_DEVICE_TYPE_GPU, 4, device_list[1], &num_device_gpu);
+  status_cpu = clGetDeviceIDs(platforms[0], CL_DEVICE_TYPE_CPU, 1, &device_list[0], &num_device_cpu);
+  status_gpu = clGetDeviceIDs(platforms[1], CL_DEVICE_TYPE_GPU, 4, &device_list[1], &num_device_gpu);
+  //cout <<"cpu: "<< status_cpu <<" "<< device_list[0] <<" "<<num_device_cpu<<" gpu: "<< status_gpu << " " << device_list[1] << " " << num_device_gpu << endl;
 
   //2.コンテキスト作成
-  cl_device_id devices[] = {device_list_cpu, device_list_gpu}
   cl_context context_cpu, context_gpu;
   context_cpu = clCreateContext(properties_cpu, num_device_cpu, &device_list[0], NULL, NULL, &status_cpu);
   context_gpu = clCreateContext(properties_gpu, num_device_gpu, &device_list[1], NULL, NULL, &status_gpu);
 
+  cout <<"status: "<< status_cpu << " "<< status_gpu << endl;
   if(status != CL_SUCCESS | status != CL_SUCCESS)
   {
     printf("clCreateContext failed %d.\n",status_cpu);
     cout << "clCreateContext failed" << status_gpu<<endl;
   }
 
+  //cout << "test\n";
   //3.コマンドキューの作成
   cl_command_queue queue_c, queue_g;
   queue_c = clCreateCommandQueue(context_cpu, device_list[0], 0, &status_cpu);
   queue_g = clCreateCommandQueue(context_gpu, device_list[1], 0, &status_gpu);
-
+  //cout << "test2\n";
   //4.プログラムオブジェクトの作成
   size_t source_size;
   char *source_str;
@@ -109,47 +110,75 @@ int main()
     fprintf(stderr, "Failed to leas kernel.\n");
     exit(1);
   }
+  //cout << "malloc begin\n";
   source_str = (char *)malloc(MAX_SOURCE_SIZE);
+  //cout << "malloc end\n";
   source_size = fread(source_str,1,MAX_SOURCE_SIZE, fp);
+  //cout << "fread end\n";
   fclose(fp);
-
+  
   cl_program program_cpu, program_gpu;
   program_cpu = clCreateProgramWithSource(context_cpu, 1, (const char**) &(source_str), &source_size, &status_cpu);
   program_gpu = clCreateProgramWithSource(context_gpu, 1, (const char**) &(source_str), &source_size, &status_gpu);
-
+  //cout << "clCreatePWS end\n";
   //5.プログラムのビルド
   status = clBuildProgram(program_cpu, num_device_cpu, &device_list[0], NULL, NULL, NULL);
   status = clBuildProgram(program_gpu, num_device_gpu, &device_list[1], NULL, NULL, NULL);
   
-  ///////////////////////////////////
+  //build error
+  if(status_cpu != CL_SUCCESS | status_gpu != CL_SUCCESS)
+  {
+    cout << "build failed \n";
+    cl_program program_err;
+    for(int i = 0; i<4 ; i++)
+    {
+      if(i=0) program_err = program_cpu;
+      else if(i=1) program_err = program_gpu; 
+      size_t logsize;
+      status = clGetProgramBuildInfo(program_err, device_list[i], CL_PROGRAM_BUILD_LOG, 0, NULL, &logsize);
+      if(status != CL_SUCCESS){
+        //ログを格納するためのバッファをアロケートする
+        char *logbuffer;
+        logbuffer = new char[logsize +1];
+        if(logbuffer == NULL){
+          printf("memory allocation failed.\n");
+          //return;
+        }
+
+        status = clGetProgramBuildInfo(program_err, device_list[i], CL_PROGRAM_BUILD_LOG, logsize, logbuffer, NULL);
+        if(status == CL_SUCCESS)
+        {
+          logbuffer[logsize] = '\0';
+          cout << "build log" << endl;
+          cout << logbuffer << endl;
+        }
+        delete [] logbuffer;
+      }
+    }
+  }
   /*
   size_t logsize;
-  status = clGetProgramBuildInfo(program, devices[0], CL_PROGRAM_BUILD_LOG, 0, NULL, &logsize);
-  if(status != CL_SUCCESS){
-    //ログを格納するためのバッファをアロケートする
-    char *logbuffer;
-    logbuffer = new char[logsize +1];
-    if(logbuffer == NULL){
-      printf("memory allocation failed.\n");
-      //return;
-    }
-
-    status = clGetProgramBuildInfo(program, devices[0], CL_PROGRAM_BUILD_LOG, logsize, logbuffer, NULL);
-    if(status == CL_SUCCESS)
-    {
-    logbuffer[logsize] = '\0';
-    cout << "build log" << endl;
-    cout << logbuffer << endl;
-    }
-    delete [] logbuffer;
-  }
-  */////////////////////////////////////////////
+  cout <<"test"<<endl;
+  cl_build_status *build_status;
+  status = clGetProgramBuildInfo(program_cpu, device_list[0], CL_PROGRAM_BUILD_LOG, 0, NULL, &logsize);
+  status_cpu = clGetProgramBuildInfo(program_cpu, device_list[0], CL_PROGRAM_BUILD_STATUS, logsize, build_status, NULL);
+  cout << "test"<<endl;
+  cout << status_cpu <<" "<<build_status<< endl;
+  status = clGetProgramBuildInfo(program_gpu, device_list[1], CL_PROGRAM_BUILD_LOG, 0, NULL, &logsize);
+  status_gpu = clGetProgramBuildInfo(program_gpu, device_list[1], CL_PROGRAM_BUILD_STATUS, logsize, build_status, NULL);
+  cout << status_gpu <<" "<<build_status<< endl;
+  */
+  cl_uint pro_info;
+  status_cpu = clGetProgramInfo(program_cpu, CL_PROGRAM_NUM_DEVICES, sizeof(pro_info), &pro_info, NULL);
+  cout << "cpu_pro_info: "<< status_cpu << " " <<pro_info<<endl;
+  status_gpu = clGetProgramInfo(program_gpu, CL_PROGRAM_NUM_DEVICES, sizeof(pro_info), &pro_info, NULL);
+  cout << "gpu_pro_info: " << status_gpu << " " << pro_info << endl;
 
   //6.カーネルの作成
   cl_kernel kernel_c, kernel_g;
   kernel_c = clCreateKernel(program_cpu, "calc", &status_cpu);
   kernel_g = clCreateKernel(program_gpu, "calc", &status_gpu);
-
+  //cout << "create kernel end\n";
   //7メモリオブジェクトの作成
   //7-1CPU
   cl_mem cmemIn1;
@@ -165,7 +194,7 @@ int main()
   gmemIn2 = clCreateBuffer(context_gpu, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(cl_int)*lvar*lwid, mtrx2, &status_gpu);
   cl_mem gmemOut;
   gmemOut = clCreateBuffer(context_gpu, CL_MEM_WRITE_ONLY, sizeof(cl_int)*fvar*fwid, NULL, &status_gpu);
-
+  //cout << "mem end"<< endl;
   //8.カーネルに渡す引数の設定
   //8-1CPU
   status = clSetKernelArg(kernel_c, 0, sizeof(cl_mem), (void *)&cmemIn1);
@@ -175,7 +204,7 @@ int main()
   status = clSetKernelArg(kernel_g, 0, sizeof(cl_mem), (void *)&gmemIn1);
   status = clSetKernelArg(kernel_g, 1, sizeof(cl_mem), (void *)&gmemIn2);
   status = clSetKernelArg(kernel_g, 2, sizeof(cl_mem), (void *)&gmemOut);
-
+  //cout <<"set end"<<endl;
   //イベント
   //cl_int wait;
   cl_event gpu;
@@ -186,20 +215,23 @@ int main()
   //status = clWaitForEvents(1, *wait);
 
   //9.カーネルの実行
+  //cout << "実行"<<endl;
   size_t globalsize[] = {fvar*fwid};
+  //cout << "globalsizeal size" <<endl;
 
   clock_t ct3, ct4, gt3, gt4;
   gt3 = clock();
   status_gpu = clEnqueueNDRangeKernel(queue_g, kernel_g, 1, NULL, globalsize, 0, 0, NULL, &gpu);
+  //cout <<"do kernel: "<< status_gpu <<endl;
   gt4 = clock();
-  status = clGetEventInfo(gpu, CL_EVENT_COMMAND_QUEUE, sizeof(char)*1000, event, &event_size);
-  cout << status << " " << event << endl;
-  status = clGetEventInfo(gpu, CL_EVENT_COMMAND_TYPE, sizeof(char)*1000, event, &event_size);
-  cout << status << " " << event << endl;
-  status = clGetEventInfo(gpu, CL_EVENT_COMMAND_EXECUTION_STATUS, sizeof(exec_status), &exec_status, NULL);
-  cout << status << "! " ;
-  switch (exec_status)
-  {
+  /*status = clGetEventInfo(gpu, CL_EVENT_COMMAND_QUEUE, sizeof(char)*1000, event, &event_size);
+    cout << status << " " << event << endl;
+    status = clGetEventInfo(gpu, CL_EVENT_COMMAND_TYPE, sizeof(char)*1000, event, &event_size);
+    cout << status << " " << event << endl;
+    status = clGetEventInfo(gpu, CL_EVENT_COMMAND_EXECUTION_STATUS, sizeof(exec_status), &exec_status, NULL);
+    cout << status << "! " ;
+    switch (exec_status)
+    {
     case CL_QUEUED:
     cout << "CL_QUEUED" << endl;
     break;
@@ -212,16 +244,16 @@ int main()
     case CL_COMPLETE:
     cout << "CL_COMPLETE" << endl;
     break;
-  }
-  status = clGetEventInfo(gpu, CL_EVENT_REFERENCE_COUNT, sizeof(char)*1000, event, &event_size);
-  cout << status << " " << event << endl;
+    }
+    status = clGetEventInfo(gpu, CL_EVENT_REFERENCE_COUNT, sizeof(char)*1000, event, &event_size);
+    cout << status << " " << event << endl;*/
   cout << "GPU計算終了！！！！！！！！！！！！！！" << endl;
 
   ct3 = clock();
   status_cpu = clEnqueueNDRangeKernel(queue_c, kernel_c, 1, NULL, globalsize, 0, 0, NULL, NULL);
   ct4 = clock();
-  status = clGetEventInfo(gpu, CL_EVENT_COMMAND_EXECUTION_STATUS, sizeof(exec_status), &exec_status, NULL);
-  cout << status << " " << exec_status << endl ;
+  //status = clGetEventInfo(gpu, CL_EVENT_COMMAND_EXECUTION_STATUS, sizeof(exec_status), &exec_status, NULL);
+  //cout << status << " " << exec_status << endl ;
   cout << "CPU計算終了！！！！！！！！！！！！！！" << endl;
 
   cout <<"実行結果　cpu:" <<status_cpu << " gpu:" << status_gpu << endl;
@@ -242,7 +274,7 @@ int main()
     }
     cout << endl;
     }
-    */
+  */
 
   //11.リソースの開放
   clReleaseMemObject(cmemOut);
