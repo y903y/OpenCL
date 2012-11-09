@@ -18,49 +18,40 @@ int main(){
   }
   int size;
   fscanf(fp, "%d", &size);
-  //cout<< size <<endl;
 
   mtrx1 = (double*) malloc(size * size * sizeof(double));
-  if(mtrx1==NULL) return 1;
   mtrx2 = (double*) malloc(size * size * sizeof(double));
   Out = (double*) malloc(size * size * sizeof(double));
 
+  if(mtrx1==NULL) return 1;
+  if(mtrx2==NULL) return 1;
+  if(Out==NULL) return 1;
+ 
   int i, j;
-  for(i=0;i<size;i++)
+  for(i = 0; i < size; i++)
   {
-    for(j=0;j<size;j++)
+    for(j = 0; j < size; j++)
     {
-      Out[i*size+j] = 0;
+      Out[i * size + j] = 0;
       fscanf(fp, "%lf", &mtrx1[i * size + j]);
-      //cout <<mtrx1[i*size+j]<<endl;
     }
   }
 
-  for(i=0;i<size;i++)
+  for(i = 0; i < size; i++)
   {
-    for(j=0;j<size;j++)
+    for(j = 0; j < size; j++)
     {
       fscanf(fp,"%lf", &mtrx2[i * size + j]);
     }
   }
 
-  cout<< "apistart"<<endl;
-
   fclose(fp);
-
-  /*for(int i = 0 ;i < 30;i ++)
-    {
-    cout<<mtrx1[i]<<" "<<mtrx2[i]<<endl;
-    }
-    */
 
   string filename="test.cl";
   clapi cl(filename);
   cl.hikisu(2, size*size, mtrx1, size*size, mtrx2);
   cl.doOpenCL();
-  cout<<cl.getOut()<<endl;
   Out = cl.getOut();
-  //*Out = cl_api(fvar,fwid,mtrx1,lvar,lwid,mtrx2,size,Out);
 
   //結果表示
   cout<<"加算結果"<<endl;
