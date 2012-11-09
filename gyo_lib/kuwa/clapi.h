@@ -1,8 +1,6 @@
 /*
  * clapi.h
  *
- *  Created on: 2012/11/08
- *      Author: y-kuwa
  */
 
 #ifndef CLAPI_H_
@@ -13,16 +11,22 @@
 #else
 #include<CL/cl.h>
 #endif //__APPLE
+
 #include<stdarg.h>
 #include<string>
+#include<cstdio>
+#include<iostream>
+
 #define MAX_SOURCE_SIZE (0x100000)
+
 using namespace std;
+
 class clapi {
 public:
 	clapi();
 	clapi(string);
 	~clapi();
-	bool hikisu(int, ...);
+	bool clauto(int , ...);
 	bool doOpenCL();
 	double* getOut();
 
@@ -46,7 +50,6 @@ private:
 	int size[10];
 	int num_hikisu;
 	double* Out;
-
 };
 
 #endif /* CLAPI_H_ */

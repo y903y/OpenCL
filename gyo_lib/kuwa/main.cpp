@@ -47,10 +47,17 @@ int main(){
 
   fclose(fp);
 
+  //kotake
+  //1.カーネルプログラム指定
   string filename="test.cl";
+  //2.オブジェクト生成？？？
   clapi cl(filename);
-  cl.hikisu(2, size*size, mtrx1, size*size, mtrx2);
-  cl.doOpenCL();
+  //3.メンバ関数実行
+  //cl.auto(入力数, データ１のdouble型配列の個数, データ１の配列のアドレス, データ２の配列の個数, データ２の配列のアドレス, ....)
+  cl.clauto(2, size*size, mtrx1, size*size, mtrx2);
+  //cl.doOpenCL();
+  //if(cl.hikisu != true || doOpenCL != true) return 0;
+  
   Out = cl.getOut();
 
   //結果表示

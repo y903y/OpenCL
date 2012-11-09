@@ -14,7 +14,6 @@
 #include<cstdio>
 #include"clapi.h"
 
-
 #ifdef __APPLE__
 #include<OpenCL/opencl.h>
 #else
