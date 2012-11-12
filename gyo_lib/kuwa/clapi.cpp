@@ -53,11 +53,11 @@ bool clapi::doOpenCL() {
   }
   // 最初の要素として返されたプラットフォームIDを、プロパティにセットする
   properties[0] = CL_CONTEXT_PLATFORM;
-  properties[1] = (cl_context_properties)platforms[0];
+  properties[1] = (cl_context_properties)platforms[1];
   properties[2] = 0;
 
   //1.デバイスの取得
-  status = clGetDeviceIDs(platforms[0], CL_DEVICE_TYPE_CPU, 1, &device_list[0], &num_device);
+  status = clGetDeviceIDs(platforms[1], CL_DEVICE_TYPE_GPU, 4, &device_list[0], &num_device);
   if (status != CL_SUCCESS || num_device <= 0) {
     fprintf(stdout, "clGetDeviceIDs failed.\n");
     printf("%d\n", status);
@@ -99,6 +99,7 @@ bool clapi::doOpenCL() {
   //5.プログラムのビルド
   status = clBuildProgram(program, num_device, &device_list[0], NULL, NULL, NULL);
   if (status != CL_SUCCESS) {
+    cout << "clBuildProgram failed \nError Code: "<< status << endl;
     builderr();
     return false;
   }
@@ -172,28 +173,28 @@ double* clapi::getOut(){
 
 
 void clapi::builderr() {
-  cout << "clBuildProgram failed \n";
-  cl_program program_err;
-
   size_t logsize;
-  status = clGetProgramBuildInfo(program_err, device_list[0],
-      CL_PROGRAM_BUILD_LOG, 0, NULL, &logsize);
-  if (status != CL_SUCCESS) {
+  status = clGetProgramBuildInfo(program, device_list[0], CL_PROGRAM_BUILD_LOG, 0, NULL, &logsize);
+  if (status == CL_SUCCESS) {
     //ログを格納するためのバッファをアロケートする
     char *logbuffer;
     logbuffer = new char[logsize + 1];
     if (logbuffer == NULL) {
       printf("memory allocation failed.\n");
-      //return;
-
-      status = clGetProgramBuildInfo(program_err, device_list[0],
-          CL_PROGRAM_BUILD_LOG, logsize, logbuffer, NULL);
-      if (status == CL_SUCCESS) {
-        logbuffer[logsize] = '\0';
-        cout << "build log" << endl;
-        cout << logbuffer << endl;
-      }
-      delete[] logbuffer;
+      return;
     }
+    
+    status = clGetProgramBuildInfo(program, device_list[0], CL_PROGRAM_BUILD_LOG, logsize, logbuffer, NULL);
+    cout << status << endl;
+    if (status == CL_SUCCESS) {
+      logbuffer[logsize] = '\0';
+      cout << "build log" << endl;
+      cout << logbuffer << endl;
+    }
+    delete[] logbuffer;
+  }
+  else {
+    cout << "clGetProgramBuildInfo failed" << endl;
   }
 }
+

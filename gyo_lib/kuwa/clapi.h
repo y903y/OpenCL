@@ -29,14 +29,14 @@ public:
 	bool clauto(int , ...);
 	bool doOpenCL();
 	double* getOut();
-
+        cl_device_id device_list[4];
 private:
 	void builderr();
 	cl_int status;
 	cl_platform_id platforms[2];
 	cl_uint num_platforms;
 	cl_context context;
-	cl_device_id device_list[4]; //なぜか2じゃできない
+	//cl_device_id device_list[4]; //なぜか2じゃできない
 	cl_uint num_device;
 	cl_context_properties properties[3];
 	cl_command_queue queue;
