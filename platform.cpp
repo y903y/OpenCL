@@ -36,6 +36,16 @@ int main(){
       clGetDeviceInfo(dev[j],CL_DEVICE_NAME,sizeof(buff),buff,NULL);
       cout<<" Device Name = "<<buff<<endl;
     }
+   /* 
+    clGetDeviceInfo(dev[0],CL_DEVICE_NAME,sizeof(buff),buff,NULL);
+    cout<<" Device Name = "<<buff<<endl;
+    clGetDeviceInfo(dev[1],CL_DEVICE_NAME,sizeof(buff),buff,NULL);
+    cout<<" Device Name = "<<buff<<endl;
+    clGetDeviceInfo(dev[2],CL_DEVICE_NAME,sizeof(buff),buff,NULL);
+    cout<<" Device Name = "<<buff<<endl;
+    clGetDeviceInfo(dev[3],CL_DEVICE_NAME,sizeof(buff),buff,NULL);
+    cout<<" Device Name = "<<buff<<endl;
+    */
     cout << endl;
   }
 }
