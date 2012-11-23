@@ -29,7 +29,7 @@ public:
 	bool clauto(int , ...);
 	bool doOpenCL();
 	double* getOut();
-        cl_device_id device_list[4];
+        //cl_device_id device_list[5];
 private:
 	void builderr();
 	cl_int status;
@@ -38,7 +38,8 @@ private:
 	cl_context context;
 	//cl_device_id device_list[4]; //なぜか2じゃできない
 	cl_uint num_device;
-	cl_context_properties properties[3];
+        cl_uint ndt;
+	//cl_context_properties properties[3];
 	cl_command_queue queue;
 	cl_program program;
 	cl_uint pro_info;
