@@ -40,7 +40,13 @@ private:
 	cl_uint num_device;
         cl_uint ndt;
 	//cl_context_properties properties[3];
-	cl_command_queue queue;
+	
+        cl_command_queue queue;
+
+        cl_command_queue queue2;
+        cl_command_queue queue3;
+
+
 	cl_program program;
 	cl_uint pro_info;
 	cl_kernel kernel;

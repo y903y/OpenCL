@@ -95,7 +95,13 @@ bool clapi::doOpenCL() {
     }
 
     //3.コマンドキューの作成
-    queue = clCreateCommandQueue(context, *device_list, 0, &status);
+   // queue = clCreateCommandQueue(context, *device_list, 0, &status);
+
+    queue = clCreateCommandQueue(context, device_list[0], 0, &status);
+    queue2 = clCreateCommandQueue(context, device_list[1], 0, &status);
+    queue3 = clCreateCommandQueue(context, device_list[2], 0, &status);
+    
+    
     if (status != CL_SUCCESS) {
       cout << "clCreateCommandQueue failed\nError Code: " << status << endl;
       return false;
@@ -179,6 +185,18 @@ bool clapi::doOpenCL() {
     cout <<"zikou"<<endl;
     size_t globalsize[] = { size[0] };
     status = clEnqueueNDRangeKernel(queue, kernel, 1, NULL, globalsize, NULL, 0, NULL, NULL);
+
+    
+    
+
+
+    status = clEnqueueNDRangeKernel(queue2, kernel, 1, NULL, globalsize, NULL, 0, NULL, NULL);
+    
+    
+    status = clEnqueueNDRangeKernel(queue3, kernel, 1, NULL, globalsize, NULL, 0, NULL, NULL);
+
+
+
     if (status != CL_SUCCESS) {
       cout << "clEnqueueNDRangeKernel failed\nError Code: " << status << endl;
       return false;
@@ -186,7 +204,12 @@ bool clapi::doOpenCL() {
 
     //10.結果の取得
     Out = (double*) malloc(size[0] * sizeof(double));
+    
+    //ここも書きなおすべき
     status = clEnqueueReadBuffer(queue, memOut, CL_TRUE, 0, sizeof(double)*size[1], Out, 0, NULL, NULL);
+    
+    
+    
     if (status != CL_SUCCESS) {
       cout << "clEnqueueReadBuffer failed\nError Code: " << status << endl;
       return false;
